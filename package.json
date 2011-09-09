@@ -1,0 +1,15 @@
+{
+  "author": "bitfloor <support@bitfloor.com>",
+  "name": "bitfloor_trader",
+  "description": "Sample trader for bitfloor",
+  "version": "0.0.0",
+  "homepage": "bitfloor.com",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bitfloor/trader.nodejs.git"
+  },
+  "dependencies": {
+    "colors":"*"
+  },
+  "devDependencies": {}
+}
