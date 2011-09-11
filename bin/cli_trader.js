@@ -65,13 +65,13 @@ function order_new(product, price, size, side, cb) {
     var out = {
         price: price,
         size: size,
-        product: product,
+        product_id: product,
         side: side,
     };
 
     send('/order/new', out, function(response) {
-        if (response.reject_reason) {
-            console.log('[rejected] %s'.red, response.reject_reason);
+        if (response.error) {
+            console.log('[rejected] %s'.red, response.error);
         } else if (response.order_id) {
             console.log('[placed] order id: %s'.green, response.order_id);
         } else {
@@ -84,14 +84,14 @@ function order_new(product, price, size, side, cb) {
 
 function order_cancel(product, order_id, cb) {
     var out = {
-        product: product,
+        product_id: product,
         order_id: order_id
     };
 
     send('/order/cancel', out, function(response) {
-        if (response.reject_reason) {
-            console.log('[rejected] %s'.red, response.reject_reason);
-        } else if (response.status === 'cancelled') {
+        if (response.error) {
+            console.log('[rejected] %s'.red, response.error);
+        } else if (response.order_id) {
             console.log('[cancelled] %s'.green, response.order_id);
         } else {
             console.log('unknown response: %j'.red, response);
@@ -116,6 +116,13 @@ function orders(cb) {
     });
 }
 
+function order(order_id, cb) {
+    send('/order/details', { order_id: order_id }, function(response) {
+        console.log(response);
+        cb();
+    });
+}
+
 var rl = readline.createInterface(process.stdin, process.stdout);
 
 rl.prompt();
@@ -133,7 +140,7 @@ var handlers = {
         var price = params.shift();
 
         // send new order
-        order_new(product, price, size, 'buy', cb);
+        order_new(product, price, size, 0, cb);
     },
     'sell': function(params, cb) {
         if (params.length != 3) {
@@ -146,10 +153,14 @@ var handlers = {
         var price = params.shift();
 
         // send new order
-        order_new(product, price, size, 'sell', cb);
+        order_new(product, price, size, 1, cb);
     },
     'orders': function(params, cb) {
         orders(cb);
+    },
+    'order': function(params, cb) {
+        var order_id = params.shift();
+        order(order_id, cb);
     },
     'cancel': function(params, cb) {
         if (params.length != 2) {
