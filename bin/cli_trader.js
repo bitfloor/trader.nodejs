@@ -123,6 +123,18 @@ function order(order_id, cb) {
     });
 }
 
+function positions(cb) {
+    send('/positions', {}, function(response) {
+        response.forEach(function(position) {
+            var amnt = position.amount;
+            var hold = position.hold;
+            console.log('%s\tamnt: %d\thold: %d\t avail: %d',
+                        position.currency, amnt, hold, amnt - hold);
+        });
+        cb();
+    });
+}
+
 var rl = readline.createInterface(process.stdin, process.stdout);
 
 rl.prompt();
@@ -172,6 +184,9 @@ var handlers = {
         var order_id = params.shift();
 
         order_cancel(product, order_id, cb);
+    },
+    'positions': function(params, cb) {
+        positions(cb);
     },
     'exit': function() {
         rl.close();
