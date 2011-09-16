@@ -1,6 +1,6 @@
 {
     "api_key": "your-api-key-here",
     "sec_key": "your-secret-key-here",
-    "host": "rapi.testnet.bitfloor.com",
+    "host": "api.testnet.bitfloor.com",
     "port": 80
 }
