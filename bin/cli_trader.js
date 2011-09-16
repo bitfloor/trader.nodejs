@@ -1,144 +1,14 @@
 #!/usr/bin/env node
 
 // builtin
-var http = require('http');
-var https = require('https');
-var querystring = require('querystring');
-var crypto = require('crypto');
 var readline = require('readline');
 
+// 3rd party
 var colors = require('colors');
 
-// trader setup
-var config = require('../config.json');
-
-// the hmac which will sign our requests
-var api_key = config.api_key;
-var sec_key = config.sec_key;
-
-var host = config.host;
-var port = config.port;
-
-/// send payload to url
-/// nonce will be added
-/// callback(response)
-function send(url, payload, cb) {
-    payload.nonce = Date.now();
-    var body = querystring.stringify(payload);
-
-    var hmac = crypto.createHmac('sha512', sec_key);
-    hmac.update(body);
-    var sign = hmac.digest('base64');
-
-    var options = {
-        host: host,
-        port: port,
-        path: url,
-        method: 'POST',
-        headers: {
-            'bitfloor-key': api_key,
-            'bitfloor-sign': sign,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': body.length
-        }
-    };
-
-    var proto = port === 443 ? https : http;
-    var req = proto.request(options, function(res) {
-        var buff = '';
-        res.setEncoding('utf8');
-        res.on('data', function(data) {
-            buff += data;
-        });
-
-        res.on('end', function() {
-            var msg = JSON.parse(buff);
-            cb(msg);
-        });
-
-    });
-
-    // write the payload out to the request
-    req.write(body);
-    req.end();
-}
-
-function order_new(product, price, size, side, cb) {
-    var out = {
-        price: price,
-        size: size,
-        product_id: product,
-        side: side,
-    };
-
-    send('/order/new', out, function(response) {
-        if (response.error) {
-            console.log('[rejected] %s'.red, response.error);
-        } else if (response.order_id) {
-            console.log('[placed] order id: %s'.green, response.order_id);
-        } else {
-            console.log('unknown response: %j'.red, response);
-        }
-
-        cb();
-    });
-}
-
-function order_cancel(product, order_id, cb) {
-    var out = {
-        product_id: product,
-        order_id: order_id
-    };
-
-    send('/order/cancel', out, function(response) {
-        if (response.error) {
-            console.log('[rejected] %s'.red, response.error);
-        } else if (response.order_id) {
-            console.log('[cancelled] %s'.green, response.order_id);
-        } else {
-            console.log('unknown response: %j'.red, response);
-        }
-
-        cb();
-    });
-}
-
-function orders(cb) {
-    send('/orders', {}, function(response) {
-        response.forEach(function(order) {
-            var side = 'buy';
-            if (order.side === 1) {
-                side = 'sell'
-            }
-            console.log('id: %s product: %s %s %d @ %d'.yellow,
-                        order.id, order.product_id, side, order.size, order.price);
-        });
-
-        cb();
-    });
-}
-
-function order(order_id, cb) {
-    send('/order/details', { order_id: order_id }, function(response) {
-        console.log(response);
-        cb();
-    });
-}
-
-function positions(cb) {
-    send('/positions', {}, function(response) {
-        response.forEach(function(position) {
-            var amnt = position.amount;
-            var hold = position.hold;
-            console.log('%s\tamnt: %d\thold: %d\t avail: %d',
-                        position.currency, amnt, hold, amnt - hold);
-        });
-        cb();
-    });
-}
+var trader = require('../lib/rest_trader');
 
 var rl = readline.createInterface(process.stdin, process.stdout);
-
 rl.prompt();
 
 // handle commands from readline
@@ -153,8 +23,15 @@ var handlers = {
         var size = params.shift();
         var price = params.shift();
 
-        // send new order
-        order_new(product, price, size, 0, cb);
+        trader.order_new(product, price, size, 0, function(err, detail) {
+            if (err) {
+                console.log('[rejected] %s'.red, err.message);
+                return cb();
+            }
+
+            console.log('[placed] order id: %s'.green, detail.order_id);
+            cb();
+        });
     },
     'sell': function(params, cb) {
         if (params.length != 3) {
@@ -166,11 +43,34 @@ var handlers = {
         var size = params.shift();
         var price = params.shift();
 
-        // send new order
-        order_new(product, price, size, 1, cb);
+        trader.order_new(product, price, size, 1, function(err, detail) {
+            if (err) {
+                console.log('[rejected] %s'.red, err.message);
+                cb();
+            }
+
+            console.log('[placed] order id: %s'.green, detail.order_id);
+            cb();
+        });
     },
     'orders': function(params, cb) {
-        orders(cb);
+        trader.orders(function(err, orders) {
+            if (err) {
+                console.log('[error] %s'.red, err.message);
+                return cb();
+            }
+
+            orders.forEach(function(order) {
+                var side = 'buy';
+                if (order.side === 1) {
+                    side = 'sell'
+                }
+                console.log('id: %s product: %s %s %d @ %d'.yellow,
+                            order.id, order.product_id, side, order.size, order.price);
+            });
+
+            cb();
+        });
     },
     'order': function(params, cb) {
         var order_id = params.shift();
@@ -185,17 +85,38 @@ var handlers = {
         var product = params.shift();
         var order_id = params.shift();
 
-        order_cancel(product, order_id, cb);
+        trader.order_cancel(product, order_id, function(err, detail) {
+            if (err) {
+                console.log('[error] %s'.red, err.message);
+                return cb();
+            }
+
+            console.log('[cancelled] order id: %s'.green, detail.order_id);
+            cb();
+        });
     },
     'positions': function(params, cb) {
-        positions(cb);
+        trader.positions(function(err, positions) {
+            if (err) {
+                console.log('[error] %s'.red, err.message);
+                return cb();
+            }
+
+            positions.forEach(function(position) {
+                var amnt = position.amount;
+                var hold = position.hold;
+                console.log('%s\tamnt: %d\thold: %d\t avail: %d',
+                            position.currency, amnt, hold, amnt - hold);
+            });
+
+            cb();
+        });
     },
     'exit': function() {
         rl.close();
         process.stdin.destroy();
     }
 }
-
 
 rl.on('line', function(line) {
     var args = line.split(' ');
