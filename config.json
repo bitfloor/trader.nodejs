@@ -2,5 +2,5 @@
     "api_key": "your-api-key-here",
     "sec_key": "your-secret-key-here",
     "host": "api.testnet.bitfloor.com",
-    "port": 80
+    "port": 443
 }

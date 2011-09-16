@@ -2,6 +2,7 @@
 
 // builtin
 var http = require('http');
+var https = require('https');
 var querystring = require('querystring');
 var crypto = require('crypto');
 var readline = require('readline');
@@ -42,7 +43,8 @@ function send(url, payload, cb) {
         }
     };
 
-    var req = http.request(options, function(res) {
+    var proto = port === 443 ? https : http;
+    var req = proto.request(options, function(res) {
         var buff = '';
         res.setEncoding('utf8');
         res.on('data', function(data) {
