@@ -74,7 +74,10 @@ var handlers = {
     },
     'order': function(params, cb) {
         var order_id = params.shift();
-        order(order_id, cb);
+        trader.order_details(order_id, function(err, details) {
+            console.log(details);
+            cb();
+        });
     },
     'cancel': function(params, cb) {
         if (params.length != 2) {
