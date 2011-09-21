@@ -145,6 +145,18 @@ var handlers = {
             cb();
         });
     },
+    'help': function(params, cb) {
+        console.log('buy <product_id> <size> <price>');
+        console.log('sell <product_id> <size> <price>');
+        console.log('orders');
+        console.log('order <order_id>');
+        console.log('cancel <product_id> <order_id>');
+        console.log('book <product_id>');
+        console.log('--------');
+        console.log('help');
+        console.log('exit');
+        cb();
+    },
     'exit': function() {
         rl.close();
         process.stdin.destroy();
