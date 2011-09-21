@@ -7,6 +7,7 @@ var readline = require('readline');
 var colors = require('colors');
 
 var trader = require('../lib/rest_trader');
+var book = require('../lib/rest_book');
 
 var rl = readline.createInterface(process.stdin, process.stdout);
 rl.prompt();
@@ -112,6 +113,35 @@ var handlers = {
                             position.currency, amnt, hold, amnt - hold);
             });
 
+            cb();
+        });
+    },
+    'book': function(params, cb) {
+        var product_id = params.shift();
+
+        if (!product_id) {
+            console.log('book <product_id>');
+            return cb();
+        }
+
+        book.l2_book(product_id, function(err, book) {
+            if (err) {
+                console.log('[error] %s'.red, err.message);
+                return cb();
+            }
+
+            var bids = book.bids;
+            var asks = book.asks;
+
+            function print_level(name, level) {
+                if (!level) {
+                    return console.log('%s: empty', name);
+                }
+                console.log('%s: %d @ %d', name, level[1], level[0]);
+            }
+
+            print_level('bid', bids.shift());
+            print_level('ask', asks.shift());
             cb();
         });
     },
