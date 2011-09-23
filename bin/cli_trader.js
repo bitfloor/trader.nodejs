@@ -99,18 +99,18 @@ var handlers = {
             cb();
         });
     },
-    'positions': function(params, cb) {
-        trader.positions(function(err, positions) {
+    'accounts': function(params, cb) {
+        trader.accounts(function(err, accounts) {
             if (err) {
                 console.log('[error] %s'.red, err.message);
                 return cb();
             }
 
-            positions.forEach(function(position) {
-                var amnt = position.amount;
-                var hold = position.hold;
+            accounts.forEach(function(account) {
+                var amnt = account.amount;
+                var hold = account.hold;
                 console.log('%s\tamnt: %d\thold: %d\t avail: %d',
-                            position.currency, amnt, hold, amnt - hold);
+                            account.currency, amnt, hold, amnt - hold);
             });
 
             cb();
@@ -148,10 +148,12 @@ var handlers = {
     'help': function(params, cb) {
         console.log('buy <product_id> <size> <price>');
         console.log('sell <product_id> <size> <price>');
+        console.log('cancel <product_id> <order_id>');
+        console.log('--------');
         console.log('orders');
         console.log('order <order_id>');
-        console.log('cancel <product_id> <order_id>');
         console.log('book <product_id>');
+        console.log('accounts');
         console.log('--------');
         console.log('help');
         console.log('exit');
