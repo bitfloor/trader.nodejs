@@ -67,7 +67,7 @@ var handlers = {
                     side = 'sell'
                 }
                 console.log('id: %s product: %s %s %d @ %d'.yellow,
-                            order.id, order.product_id, side, order.size, order.price);
+                            order.order_id, order.product_id, side, order.size, order.price);
             });
 
             cb();
