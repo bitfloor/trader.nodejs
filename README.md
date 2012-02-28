@@ -2,11 +2,11 @@ node.js trading library for Bitfloor and MtGox
 
 The library is written using a typical node.js event/callback approach. See below for quick usage and the 'examples' directory for more detailed examples. All of the APIs described below are a work in progress and being actively developed. Suggestions are welcome.
 
-== Install ==
+##Install##
 
-    npm install btctrader
+    npm install git://github.com/bitfloor/trader.nodejs.git
 
-== Market Data ==
+##Market Data##
 
 To receive market data all you have to do is use the book builder to create a book for the exchange you want. Level updates will emit events.
 
@@ -38,7 +38,7 @@ book.on('changed', function(details) {
 });
 ```
 
-== Order Entry ==
+##Order Entry##
 
 Setup to enter orders is very similar to the book builder. You initialize a trader for the given exchange. Below is an example for a basic REST based trader.
 
