@@ -1,15 +1,17 @@
 {
-  "author": "bitfloor <support@bitfloor.com>",
-  "name": "bitfloor_trader",
-  "description": "Sample trader for bitfloor",
-  "version": "0.0.0",
-  "homepage": "bitfloor.com",
+  "author": "Roman Shtylman <shtylman@gmail.com>",
+  "name": "btctrader",
+  "description": "javascript bitcoin trading library for nodejs",
+  "version": "0.0.1",
+  "homepage": "https://github.com/bitfloor/trader.nodejs",
   "repository": {
     "type": "git",
     "url": "git://github.com/bitfloor/trader.nodejs.git"
   },
   "dependencies": {
-    "colors":"*"
+    "microtime": "0.2.0",
+    "colors": "0.6.0-1",
+    "decimal": "git://github.com/bitfloor/node-decimal.git#a3bb6f"
   },
   "devDependencies": {}
 }
