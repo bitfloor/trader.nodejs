@@ -11,11 +11,12 @@ var colors = require('colors');
 var trader_builder = require('..').traders;
 
 if (!process.argv[2]) {
-    console.error('config argument required');
+    console.error('<config>');
     process.exit();
 }
 
 var config = JSON.parse(fs.readFileSync(process.argv[2]));
+var exchange = config.exchange;
 
 // for order entry
 var api_key = config.api_key;
@@ -24,16 +25,13 @@ var sec_key = config.sec_key;
 // order entry and market data
 var host = config.host;
 
-var product_id = 1; // BTCUSD
-
 // setup order entry
 var trader = trader_builder.build({
-    exchange: 'bitfloor',
+    exchange: exchange,
     protocol: 'rest',
     host: host,
     api_key: api_key,
     sec_key: sec_key,
-    product_id: product_id,
 });
 
 var rl = readline.createInterface(process.stdin, process.stdout);
@@ -54,13 +52,13 @@ var handlers = {
             side: 0,
         }
 
-        trader.new_order(details, function(err, detail) {
+        trader.new_order(details, function(err, order_id) {
             if (err) {
                 console.log('[rejected] %s'.red, err.message);
                 return cb();
             }
 
-            console.log('[placed] order id: %s'.green, detail.order_id);
+            console.log('[placed] order id: %s'.green, order_id);
             cb();
         });
     },
@@ -77,13 +75,13 @@ var handlers = {
             side: 1,
         }
 
-        trader.new_order(details, function(err, detail) {
+        trader.new_order(details, function(err, order_id) {
             if (err) {
                 console.log('[rejected] %s'.red, err.message);
                 cb();
             }
 
-            console.log('[placed] order id: %s'.green, detail.order_id);
+            console.log('[placed] order id: %s'.green, order_id);
             cb();
         });
     },
@@ -105,6 +103,21 @@ var handlers = {
             }
 
             console.log('[cancelled] order id: %s'.green, detail.order_id);
+            cb();
+        });
+    },
+    'orders': function(params, cb) {
+        trader.orders(function(err, orders) {
+            if (err) {
+                console.log('[error] %s'.red, err.message);
+                return cb();
+            }
+
+            orders.forEach(function(order) {
+                var side = (order.side === 0) ? 'buy' : 'sell';
+                console.log('[%s] %s %d @ %d'.yellow,
+                            order.id, side, order.size, order.price);
+            });
             cb();
         });
     },
@@ -149,6 +162,7 @@ var handlers = {
         console.log('sell <product_id> <size> <price>');
         console.log('cancel <product_id> <order_id>');
         console.log('--------');
+        console.log('orders');
         console.log('accounts');
         console.log('withdraw <amount> <destination>');
         console.log('--------');
