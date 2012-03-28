@@ -69,7 +69,7 @@ var handlers = {
         }
 
         var details = {
-            productt: params.shift(),
+            product_id: params.shift(),
             size: params.shift(),
             price: params.shift(),
             side: 1,
@@ -104,6 +104,44 @@ var handlers = {
 
             console.log('[cancelled] order id: %s'.green, detail.order_id);
             cb();
+        });
+    },
+    'cancel-all': function(params, cb) {
+        if (params.length != 1) {
+            console.log('cancel-all <product_id>');
+            return cb();
+        }
+
+        var product_id = params.shift();
+
+        trader.orders(function(err, orders) {
+            if (err) {
+                console.log('[error] %s'.red, err.message);
+                return cb();
+            }
+
+            (function next(err, detail) {
+                if (err) {
+                    console.log('[error] %s'.red, err.message);
+                    return cb();
+                }
+
+                if (detail) {
+                    console.log('[cancelled] order id: %s'.green, detail.order_id);
+                }
+
+                var order = orders.shift();
+                if (!order) {
+                    return cb();
+                }
+
+                var details = {
+                    product_id: product_id,
+                    order_id: order.id,
+                }
+
+                trader.cancel_order(details, next);
+            })();
         });
     },
     'orders': function(params, cb) {
@@ -161,6 +199,7 @@ var handlers = {
         console.log('buy <product_id> <size> <price>');
         console.log('sell <product_id> <size> <price>');
         console.log('cancel <product_id> <order_id>');
+        console.log('cancel-all <product_id>');
         console.log('--------');
         console.log('orders');
         console.log('accounts');
