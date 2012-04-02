@@ -177,21 +177,25 @@ var handlers = {
         });
     },
     'withdraw': function(params, cb) {
+        var currency = params.shift();
         var amount = params.shift();
+        var method = params.shift();
         var destination = params.shift();
 
-        if (!amount || !destination) {
-            console.log('withdraw <amount> <destination>');
-            return cb();
-        }
+        var opt = {
+            currency: currency,
+            amount: amount,
+            method: method,
+            destination: destination,
+        };
 
-        trader.withdraw('BTC', amount, destination, function(err) {
+        trader.withdraw(opt, function(err, response) {
             if (err) {
                 console.log('[error] %s'.red, err.message);
                 return cb();
             }
 
-            console.log('[info] withdraw submitted');
+            console.log('[info] withdraw submitted %j', response);
             cb();
         });
     },
@@ -203,7 +207,8 @@ var handlers = {
         console.log('--------');
         console.log('orders');
         console.log('accounts');
-        console.log('withdraw <amount> <destination>');
+        console.log('withdraw <currency> <amount> <method> [destination]');
+        console.log('deposit <method> <details>');
         console.log('--------');
         console.log('help');
         console.log('exit');
