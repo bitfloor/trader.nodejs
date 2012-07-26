@@ -30,6 +30,7 @@ var trader = trader_builder.build({
     exchange: exchange,
     protocol: 'rest',
     host: host,
+    port: config.port,
     api_key: api_key,
     sec_key: sec_key,
 });
