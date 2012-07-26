@@ -72,13 +72,13 @@ book.on('changed', function(details) {
         if (existing && existing.price.gte(price)) {
             return;
         }
-        price = price.add(tick_increment);
+        price = price.sub(tick_increment);
         break;
     case 1:
         if (existing && existing.price.lte(price)) {
             return;
         }
-        price = price.sub(tick_increment);
+        price = price.add(tick_increment);
         break;
     }
 
