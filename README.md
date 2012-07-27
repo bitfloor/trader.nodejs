@@ -61,7 +61,7 @@ var details = {
     side: 0, // 0 for buy, 1 for sell
     size: 0.0, // amount
     price: 0.0, // price
-    product: 1, // exchange specific product id
+    product_id: 1, // exchange specific product id
 }
 
 trader.new_order(details, function(response) {
@@ -70,7 +70,7 @@ trader.new_order(details, function(response) {
 // cancel an order
 var details = {
     order_id: '', // exchange specified order id
-    product: 1, // exchange specific product
+    product_id: 1, // exchange specific product id
 }
 
 trader.cancel_order = function(details, response) {
