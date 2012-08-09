@@ -5,7 +5,7 @@
 var fs = require('fs');
 
 // 3rd party
-var decimal = require('decimal');
+var num = require('num');
 
 // library
 var books = require('..').books;
@@ -56,7 +56,7 @@ var previous = [];
 book.on('changed', function(details) {
     var existing;
 
-    var price = decimal(details.price);
+    var price = num(details.price);
     var size = 0.1;
     var side = details.side;
 
