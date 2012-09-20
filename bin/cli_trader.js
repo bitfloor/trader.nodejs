@@ -18,10 +18,6 @@ if (!process.argv[2]) {
 var config = JSON.parse(fs.readFileSync(process.argv[2]));
 var exchange = config.exchange;
 
-// for order entry
-var api_key = config.api_key;
-var sec_key = config.sec_key;
-
 // order entry and market data
 var host = config.host;
 
@@ -31,8 +27,9 @@ var trader = trader_builder.build({
     protocol: 'rest',
     host: host,
     port: config.port,
-    api_key: api_key,
-    sec_key: sec_key,
+    api_key: config.api_key,
+    sec_key: config.sec_key,
+    passphrase: config.passphrase,
 });
 
 var rl = readline.createInterface(process.stdin, process.stdout);
